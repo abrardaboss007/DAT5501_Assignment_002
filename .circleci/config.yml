@@ -4,6 +4,8 @@ jobs:
   build:
     docker:
       - image: python:3.8
+    environment:
+      PYTHONPATH: ~/project_root 
     steps:
       - checkout
       - run:
@@ -11,7 +13,7 @@ jobs:
           command: pip install -r requirements.txt
       - run:
           name: Run test_fertility_rates_forecasting
-          command: pytest fertility_rates_forecasting/test_fertility_rates_forecasting.py
+          command: python -m unittest fertility_rates_forecasting.test_fertility_rate_forecasting
           
 
 workflows:

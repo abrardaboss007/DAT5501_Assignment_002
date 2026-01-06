@@ -10,6 +10,9 @@ jobs:
           name: Install pytest
           command: pip install pytest
       - run:
+          name: Install pandas
+          command: pip install pandas
+      - run:
           name: Run test_fertility_rates_forecasting
           command: pytest test_suite_fertility_code/test_fertility_rates_forecasting.py
           

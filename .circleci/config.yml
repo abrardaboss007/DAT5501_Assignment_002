@@ -11,8 +11,11 @@ jobs:
           name: Install dependencies
           command: pip install -r requirements.txt
       - run:
+          name: Install pytest
+          command: pip install pytest
+      - run:
           name: Run test_fertility_rates_forecasting
-          command: pytest fertility_rates_forecasting/test_fertility_rates_forecasting.py
+          command: python -m unittest fertility_rates_forecasting.test_fertility_rates_forecasting
           
 
 workflows:

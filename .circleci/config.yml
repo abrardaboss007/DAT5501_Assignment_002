@@ -10,8 +10,8 @@ jobs:
           name: Install pytest
           command: pip install pytest
       - run:
-          name: Run tests
-          command: pytest test_fertility_rates.py
+          name: Run test_fertility_rates_forecasting
+          command: pytest test_suite_fertility_code/test_fertility_rates_forecasting.py
           
 
 workflows:

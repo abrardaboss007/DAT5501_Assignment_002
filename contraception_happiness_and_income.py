@@ -1,0 +1,136 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import streamlit as st
+import os
+
+def load_csv_file(filename):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(current_dir, "..", "csv_files", filename)
+    df = pd.read_csv(csv_path)
+    return df
+
+# Bring in relevant csv files
+contraceptive_prevalence_df = load_csv_file("contraceptive_prevalence.csv")
+self_reported_happiness_df = load_csv_file("cantril_ladder_score.csv")
+median_income_df = load_csv_file("daily_median_income.csv")
+countries_by_continent_df = load_csv_file("countries_by_continent.csv")
+
+# Rename columns of specified dataframe according to rename_dict
+# This will return a df with the renamed columns
+def rename_columns(df, rename_dict):
+    return df.rename(columns=rename_dict)
+
+# Convert specified columns of a dataframe to numeric data type and return said dataframe
+def convert_columns_to_numeric(df, columns):
+    for col in columns:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    return df
+
+contraceptive_prevalence_rename_dict = {
+    "Entity": "country", 
+    "Code": "code",
+    "Year": "year",
+    f"Contraceptive prevalence, any method (% of married women ages 15-49)": "contraceptive_prevalence",
+    "World region according to OWID":"world_region"
+}
+contraceptive_prevalence_numeric_cols = ["year", "contraceptive_prevalence"]
+
+self_reported_happiness_rename_dict = {
+    "Entity": "country", 
+    "Code": "code",
+    "Year": "year",
+    "Cantril ladder score": "cantril_score"
+}
+self_reported_happiness_numeric_cols = ["year", "cantril_score"]
+
+median_income_rename_dict = {
+    "Entity": "country", 
+    "Code": "code",
+    "Year": "year",
+    "Median (2021 prices)": "daily_median_income"
+}
+median_income_numeric_cols = ["year", "daily_median_income"]
+
+# For contraceptive_prevalence_df
+contraceptive_prevalence_df = rename_columns(contraceptive_prevalence_df, contraceptive_prevalence_rename_dict)
+contraceptive_prevalence_df = convert_columns_to_numeric(contraceptive_prevalence_df, contraceptive_prevalence_numeric_cols)
+
+# For self_report_happiness_df
+self_reported_happiness_df = rename_columns(self_reported_happiness_df, self_reported_happiness_rename_dict)
+self_reported_happiness_df = convert_columns_to_numeric(self_reported_happiness_df, self_reported_happiness_numeric_cols)
+
+# For median_income_df
+median_income_df= rename_columns(median_income_df, median_income_rename_dict)
+median_income_df = convert_columns_to_numeric(median_income_df, median_income_numeric_cols)
+
+# Merge all dataframes together
+contraception_happiness_df = pd.merge(
+    left = contraceptive_prevalence_df, right= self_reported_happiness_df,
+    how = 'inner', on = ["code","country","year"]
+)
+
+contraception_happiness_income_df  = pd.merge(
+    left = contraception_happiness_df , right= median_income_df,
+    how = 'inner', on = ["code","country","year"]
+)
+
+# Select years greater than 1950 and drop NA values
+contraception_happiness_income_df = contraception_happiness_income_df[contraception_happiness_income_df["year"] >= 1950]
+contraception_happiness_income_df = contraception_happiness_income_df.dropna(axis = 0, subset=["contraceptive_prevalence","cantril_score","daily_median_income"])
+
+summary_mean_df = contraception_happiness_income_df.groupby("country").agg({
+    "contraceptive_prevalence": "mean",
+    "cantril_score": "mean",
+    "daily_median_income":"mean"
+}).reset_index()
+
+
+# Merge continent info to summary dataframe
+summary_with_continent_df = pd.merge(
+    left = summary_mean_df, right = countries_by_continent_df,
+    how='left', left_on='country', right_on='Country'
+)
+
+# Drop rows with missing continent info 
+summary_with_continent_df = summary_with_continent_df.dropna(subset=["Continent"])
+
+fig1, ax1 = plt.subplots(figsize=(12,8))
+
+x_values = summary_with_continent_df["daily_median_income"].to_numpy()
+y_values = summary_with_continent_df["cantril_score"].to_numpy()
+bubble_sizes = summary_with_continent_df["contraceptive_prevalence"].to_numpy()
+
+# Scale bubble sizes for better visibility
+sizes = (bubble_sizes ** 2) * 0.10 
+
+# Color bubbles by continent
+continents = summary_with_continent_df["Continent"].unique()
+palette = sns.color_palette("tab10", len(continents))
+continent_color_dict = dict(zip(continents, palette))
+
+colors = summary_with_continent_df["Continent"].map(continent_color_dict)
+
+scatter = ax1.scatter(
+    x_values, y_values, s=sizes, c=colors,
+    alpha=0.7, edgecolors='w', linewidth=0.5
+)
+
+ax1.set_xlabel("Mean Daily Median Income")
+ax1.set_ylabel("Mean Self-Reported Happiness Score (Cantril Ladder)")
+ax1.set_title("Mean Happiness vs Income sized by Contraceptive Prevalence")
+
+# Create legend for continents
+from matplotlib.lines import Line2D
+
+legend_elements = [
+    Line2D([0], [0], marker='o', color='w', label=continent,
+           markerfacecolor=color, markersize=10)
+    for continent, color in continent_color_dict.items()
+]
+
+ax1.legend(handles=legend_elements, title="Continent", loc='best')
+
+plt.tight_layout()
+

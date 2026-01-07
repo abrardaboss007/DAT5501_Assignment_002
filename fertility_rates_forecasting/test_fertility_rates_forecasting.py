@@ -5,8 +5,8 @@ import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.normpath(os.path.join(current_dir, ".."))
 
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 import fertility_rates_forecasting.fertility_rates_forecasting as fertility_rates_forecasting
 
 

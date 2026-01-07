@@ -1,13 +1,12 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-import streamlit as st
 import os
+import streamlit as st
 
 def load_csv_file(filename):
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    csv_path = os.path.join(current_dir, "..", "csv_files", filename)
+    csv_path = os.path.join(current_dir, "csv_files", filename)
     df = pd.read_csv(csv_path)
     return df
 
@@ -35,7 +34,6 @@ test_df = world_fertility_df.iloc[-10:] # test data
 
 x_values_training = train_df["year"].to_numpy()
 y_values_training = train_df["fertility_rate"].to_numpy()
-
 
 future_years = np.arange(test_df["year"].max() + 1, 2051)
 future_predictions = {}
@@ -70,9 +68,9 @@ ax1.set_ylabel("Fertility Rate")
 ax1.set_title("Fertility rates in USA with Polynomial Forecasts")
 ax1.legend(loc='upper left', bbox_to_anchor=(1, 1), fontsize='small')
 
-st.pyplot(fig1)
-
-# ------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------
+# Get chi^2 and bic values to decide which polynomial order is best
+# ----------------------------------------------------------------------------------------------------------------
 # Variables that will help in plotting the graph
 chi2_per_dof_vals = []
 bic_vals = []
@@ -103,12 +101,12 @@ ax2.plot(degrees, bic_vals, marker='s', label='BIC')
 ax2.set_xlabel('Polynomial Degree')
 ax2.set_title('Chi² per DoF and BIC by Polynomial Degree')
 ax2.legend()
-st.pyplot(fig2)
+
 
 # Inform user of best model
 best_index = np.argmin(bic_vals)
 best_degree = degrees[best_index]
-st.write(f"Best polynomial degree by BIC: {best_degree}")
+#st.write(f"Best polynomial degree by BIC: {best_degree}")
 
 # Inform user of coefficient of best model and uncertainties in parameters
 mask = (~np.isnan(x_values_training)) & (~np.isnan(y_values_training)) & (~np.isinf(x_values_training)) & (~np.isinf(y_values_training))
@@ -116,9 +114,9 @@ x_fit = x_values_training[mask]
 y_fit = y_values_training[mask]
 
 coeffs, cov = np.polyfit(x_fit, y_fit, deg=best_degree, cov=True)
-st.write(f"Model coefficients for degree {best_degree}:", coeffs)
-st.write(f"Covariance matrix:\n", cov)
+#st.write(f"Model coefficients for degree {best_degree}:", coeffs)
+#st.write(f"Covariance matrix:\n", cov)
 
 # Parameter uncertainties are the sqrt of diagonal cov elements
 param_uncertainties = np.sqrt(np.diag(cov))
-st.write(f"Uncertainties in parameters:", param_uncertainties)
+#st.write(f"Uncertainties in parameters:", param_uncertainties)

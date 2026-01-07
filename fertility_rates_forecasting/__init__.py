@@ -1,4 +1,5 @@
 import sys
+import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.normpath(os.path.join(current_dir, ".."))
 

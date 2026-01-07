@@ -1,7 +1,7 @@
-import unittest
-import pandas as pd
 import sys
 import os
+import unittest
+import pandas as pd
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.normpath(os.path.join(current_dir, ".."))
 
@@ -9,6 +9,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from fertility_rates_forecasting import fertility_rates_forecast
+
 
 class TestFertilityRateForecasting(unittest.TestCase):
     def test_csv_file(self):

@@ -2,7 +2,7 @@ import os
 import unittest
 import pandas as pd
 
-from .fertility_rates_forecasting import fertility_rates_forecast
+import fertility_rates_forecast
 
 
 class TestFertilityRateForecasting(unittest.TestCase):

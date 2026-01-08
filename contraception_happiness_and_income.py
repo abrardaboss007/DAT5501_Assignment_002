@@ -63,6 +63,7 @@ self_reported_happiness_df = convert_columns_to_numeric(self_reported_happiness_
 # For median_income_df
 median_income_df= rename_columns(median_income_df, median_income_rename_dict)
 median_income_df = convert_columns_to_numeric(median_income_df, median_income_numeric_cols)
+median_income_df["annual_median"] = median_income_df["daily_median_income"] * 365.25
 
 # Inner joins ensure only complete records present in all datasets are kept,
 # preventing mismatches or missing data from polluting analysis.
@@ -84,7 +85,7 @@ contraception_happiness_income_df = contraception_happiness_income_df.dropna(axi
 summary_mean_df = contraception_happiness_income_df.groupby("country").agg({
     "contraceptive_prevalence": "mean",
     "cantril_score": "mean",
-    "daily_median_income":"mean"
+    "annual_median":"mean"
 }).reset_index()
 
 
@@ -99,7 +100,7 @@ summary_with_continent_df = summary_with_continent_df.dropna(subset=["Continent"
 
 fig1, ax1 = plt.subplots(figsize=(12,8))
 
-x_values = summary_with_continent_df["daily_median_income"].to_numpy()
+x_values = summary_with_continent_df["annual_median"].to_numpy()
 y_values = summary_with_continent_df["cantril_score"].to_numpy()
 bubble_sizes = summary_with_continent_df["contraceptive_prevalence"].to_numpy()
 
@@ -119,7 +120,7 @@ scatter = ax1.scatter(
     alpha=0.7, edgecolors='w', linewidth=0.5
 )
 
-ax1.set_xlabel("Mean Daily Median Income")
+ax1.set_xlabel("Average Annual Median Income")
 ax1.set_ylabel("Mean Self-Reported Happiness Score (Cantril Ladder)")
 ax1.set_title("Mean Happiness vs Income sized by Contraceptive Prevalence")
 

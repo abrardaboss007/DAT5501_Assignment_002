@@ -14,8 +14,8 @@ jobs:
           name: Install pytest
           command: pip install pytest
       - run:
-          name: Run test_fertility_rates_forecast
-          command: pytest test_fertility_rates_forecast.py
+          name: Run test_suite
+          command: pytest test_suite.py
           
 
 workflows:

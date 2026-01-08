@@ -7,10 +7,15 @@ This project analyses the relationships between fertility rates, contraceptive p
 This repository comprises several Python scripts, each focused on a specific data analysis theme:
 
 contraception_happiness_and_income.py: Explores how contraceptive prevalence relates to happiness and median income.
+
 fertility_rates_forecast.py: Performs polynomial forecasting of global fertility rates up to 2050.
+
 fertility_rates_vs_contraception_and_marriage.py: Analyses fertility rates in the context of contraception usage and marriage rates across countries.
+
 fertility_rate_vs_happiness.py: Studies the association between fertility rates and self-reported happiness scores.
+
 fertility_rate_vs_income_and_gdp.py: Investigates how fertility rates relate to income and GDP levels.
+
 Each script loads relevant CSV files from the csv_files directory using portable path constructions to ensure environment independence. Data cleaning and processing functions (e.g., column renaming and numeric conversions) are consistently applied to guarantee reliable downstream analysis.
 
 ## Key Design Principles

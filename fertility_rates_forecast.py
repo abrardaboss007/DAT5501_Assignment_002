@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-# Loading csv files in this way ensures portability when moving across different envioronments
+# Loading csv files in this way ensures portability when moving across different environments
 def load_csv_file(filename):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     csv_path = os.path.join(current_dir, "csv_files", filename)

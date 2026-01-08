@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
-# Loading csv files in this way ensures portability when moving across different envioronments
+# Loading csv files in this way ensures portability when moving across different environments
 def load_csv_file(filename):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     csv_path = os.path.join(current_dir, "csv_files", filename)
@@ -88,8 +88,8 @@ summary_mean_df = contraception_happiness_income_df.groupby("country").agg({
 }).reset_index()
 
 
-# Merge continent info to allow continent-level grouping in visualization
-# Dropping rows without continent info to avoid misleading or incomplete color categorization.
+# Merge continent info to allow continent-level grouping in visualisation
+# Dropping rows without continent info to avoid misleading or incomplete color categorisation.
 summary_with_continent_df = pd.merge(
     left = summary_mean_df, right = countries_by_continent_df,
     how='left', left_on='country', right_on='Country'

@@ -5,27 +5,26 @@ import seaborn as sns
 import streamlit as st
 import os
 
+# Loading csv files in this way ensures portability when moving across different environments
 def load_csv_file(filename):
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    csv_path = os.path.join(current_dir, "..", "csv_files", filename)
+    csv_path = os.path.join(current_dir, "csv_files", filename)
     df = pd.read_csv(csv_path)
     return df
 
-# Bring in relevant csv files
 fertility_rate_df = load_csv_file("fertility_rate.csv")
 contraceptive_prevalence_df = load_csv_file("contraceptive_prevalence.csv")
 marriage_rate_df = load_csv_file("marriages_per_1000_people.csv")
 countries_by_continent_df = load_csv_file("countries_by_continent.csv")
 
-# Rename columns of specified dataframe according to rename_dict
-# This will return a df with the renamed columns
+# Aligns with personal naming convention and allows downstream code to be more readable and consistent and reliable without any long column names
+# Functions also facilitate unit testing
 def rename_columns(df, rename_dict):
     return df.rename(columns=rename_dict)
 
-# Convert specified columns of a dataframe to numeric data type and return said dataframe
 def convert_columns_to_numeric(df, columns):
     for col in columns:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+        df[col] = pd.to_numeric(df[col], errors="coerce")  # ensures that bad data can be handled gracefully by dropping later
     return df
 
 fertility_rate_rename_dict = {
@@ -65,7 +64,8 @@ contraceptive_prevalence_df = convert_columns_to_numeric(contraceptive_prevalenc
 marriage_rate_df = rename_columns(marriage_rate_df, marriage_rate_rename_dict)
 marriage_rate_df = convert_columns_to_numeric(marriage_rate_df, marriage_rate_numeric_cols)
 
-# Merge all dataframes together
+# Inner joins ensure only complete records present in all datasets are kept,
+# preventing mismatches or missing data from polluting analysis.
 fertility_contraception_df = pd.merge(
     left = contraceptive_prevalence_df, right= fertility_rate_df,
     how = 'inner', on = ["code","country","year"]
@@ -79,20 +79,21 @@ fertility_contraception_marriage_df = pd.merge(
 fertility_contraception_marriage_df = fertility_contraception_marriage_df[fertility_contraception_marriage_df["year"] >= 1950]
 fertility_contraception_marriage_df = fertility_contraception_marriage_df.dropna(axis = 0, subset=["contraceptive_prevalence","marriage_rate","fertility_rate"])
 
-# Aggregate by country mean to reduce data points
+# Group by country to get mean values over years, smoothing year-to-year variability
+# and enabling comparison at the country-level rather than individual years.
 summary_mean_df = fertility_contraception_marriage_df.groupby("country").agg({
     "contraceptive_prevalence": "mean",
     "fertility_rate": "mean",
     "marriage_rate": "mean"
 }).reset_index()
 
-# Merge continent info to summary dataframe
+# Merge continent info to allow continent-level grouping in visualisation
+# Dropping rows without continent info to avoid misleading or incomplete color categorisation.
 summary_with_continent_df = pd.merge(
     left = summary_mean_df, right = countries_by_continent_df,
     how='left', left_on='country', right_on='Country'
 )
 
-# Drop rows with missing continent info 
 summary_with_continent_df = summary_with_continent_df.dropna(subset=["Continent"])
 
 # Prepare data for plotting
@@ -103,7 +104,8 @@ bubble_sizes = summary_with_continent_df["marriage_rate"].to_numpy()
 # Scale bubble sizes for better visibility
 sizes = (bubble_sizes ** 2) * 10 
 
-# Map continents to colors
+# Use consistent palette and mapping to ensure colors represent continents distinctly
+# making interpretation straightforward and consistent across plots.
 continents = summary_with_continent_df["Continent"].unique()
 palette = sns.color_palette("tab10", n_colors=len(continents))
 continent_color_dict = dict(zip(continents, palette))
@@ -120,7 +122,7 @@ ax.set_xlabel("Mean Contraceptive Prevalence (%)")
 ax.set_ylabel("Mean Fertility Rate")
 ax.set_title("Fertility Rate vs Contraceptive Prevalence \nBubble size = Marriage rate, Colored by Continent")
 
-# Create legend for continents
+# Custom legend for continents avoids clutter and ensures clear association of colors.
 from matplotlib.lines import Line2D
 
 legend_elements = [
@@ -139,5 +141,4 @@ ax.legend(handles=legend_elements, title="Continent", loc="best")
 
 plt.tight_layout()
 
-# Show plot in Streamlit
-st.pyplot(fig)
+plt.show()

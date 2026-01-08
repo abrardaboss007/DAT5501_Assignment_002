@@ -136,4 +136,15 @@ print(f"Covariance matrix:\n", cov)
 param_uncertainties = np.sqrt(np.diag(cov))
 print(f"Uncertainties in parameters:", param_uncertainties)
 
-plt.show()
+# Saving figures in a controlled output folder keeps project artifacts organised,
+# and handling folder creation ensures the save doesn't fail due to missing paths.
+def save_figure(fig, fig_name, folder="output_plots", dpi=300):
+
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    output_path = os.path.join(current_dir, folder)
+    os.makedirs(output_path, exist_ok=True)
+    full_path = os.path.join(output_path, fig_name)
+    fig.savefig(full_path, dpi=dpi, bbox_inches='tight')
+
+save_figure(fig1, "fertility_rates_forecase_plot")
+save_figure(fig2, "chi2_bic_plot")

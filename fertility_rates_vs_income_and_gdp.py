@@ -118,4 +118,14 @@ ax1.set_title("Fertility Rate vs Income sized and\n coloured by GDP")
 cbar = fig1.colorbar(scatter, ax=ax1)
 cbar.set_label("Mean GDP")
 
-plt.show()
+# Saving figures in a controlled output folder keeps project artifacts organised,
+# and handling folder creation ensures the save doesn't fail due to missing paths.
+def save_figure(fig, fig_name, folder="output_plots", dpi=300):
+
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    output_path = os.path.join(current_dir, folder)
+    os.makedirs(output_path, exist_ok=True)
+    full_path = os.path.join(output_path, fig_name)
+    fig.savefig(full_path, dpi=dpi, bbox_inches='tight')
+
+save_figure(fig1, "fertility_rates_vs_income_and_gdp_plot")
